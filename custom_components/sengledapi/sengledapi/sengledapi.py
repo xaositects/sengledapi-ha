@@ -67,9 +67,9 @@ class SengledApi:
 
         url = "https://ucenter.cloud.sengled.com/user/app/customer/v2/AuthenCross.json"
         payload = {
-            "uuid": SESSION.device_id,
-            "user": SESSION.username,
-            "pwd": SESSION.password,
+            "uuid": device_id,
+            "user": username,
+            "pwd": password,
             "osType": "android",
             "productCode": "life",
             "appCode": "life",
@@ -83,6 +83,7 @@ class SengledApi:
             return False
 
         SESSION.jsession_id = data["jsessionId"]
+        _LOGGER.debug("SengledApi session id %s", str(SESSION.jsession_id))
 
         if SESSION.wifi:
             await self.async_get_server_info()
@@ -130,7 +131,14 @@ class SengledApi:
         if not SESSION.jsession_id:
             return
         url = "https://life2.cloud.sengled.com/life2/server/getServerInfo.json"
-        payload = {}
+        payload = {
+            "uuid": SESSION.device_id,
+            "user": SESSION.username,
+            "pwd": SESSION.password,
+            "osType": "android",
+            "productCode": "life",
+            "appCode": "life",
+        }
 
         data = await self.async_do_request(url, payload, SESSION.jsession_id)
 
@@ -156,20 +164,32 @@ class SengledApi:
         """
         if not SESSION.wifi_devices:
             url = "https://life2.cloud.sengled.com/life2/device/list.json"
-            payload = {}
+            payload = {
+                "uuid": SESSION.device_id,
+                "user": SESSION.username,
+                "pwd": SESSION.password,
+                "osType": "android",
+                "productCode": "life",
+                "appCode": "life",
+            }
             data = await self.async_do_request(url, payload, SESSION.jsession_id)
             if "deviceList" not in data or not data["deviceList"]:
+                _LOGGER.debug("SengledApi: Get Wifi Devices data is: %s", data)
                 return SESSION.wifi_devices
-            for devices in data["deviceList"]:
-                found = False
 
-                for dev in SESSION.wifi_devices:
-                    if dev.uuid == devices["deviceUuid"]:
-                        found = True
-                        break
-                if not found:
-                    _LOGGER.debug("SengledApi: Get Wifi Mqtt Devices %s", devices)
-                    SESSION.wifi_devices.append(BulbProperty(self, devices, True))
+            if data is not None:
+                for devices in data["deviceList"]:
+                    found = False
+
+                    for dev in SESSION.wifi_devices:
+                        if dev.uuid == devices["deviceUuid"]:
+                            found = True
+                            break
+                    if not found:
+                        _LOGGER.debug("SengledApi: Get Wifi Mqtt Devices %s", devices)
+                        SESSION.wifi_devices.append(BulbProperty(self, devices, True))
+            else:
+                _LOGGER.debug("SengledApi: No Data Returned from https://life2.cloud.sengled.com/life2/device/list.json")
         return SESSION.wifi_devices
 
     async def async_get_devices(self):
@@ -178,12 +198,20 @@ class SengledApi:
             url = (
                 "https://element.cloud.sengled.com/zigbee/device/getDeviceDetails.json"
             )
-            payload = {}
+            payload = {
+            "uuid": SESSION.device_id,
+            "user": SESSION.username,
+            "pwd": SESSION.password,
+            "osType": "android",
+            "productCode": "life",
+            "appCode": "life",
+            }
             data = await self.async_do_request(url, payload, SESSION.jsession_id)
-            for d in data["deviceInfos"]:
-                for devices in d["lampInfos"]:
-                    SESSION.devices.append(BulbProperty(self, devices, False))
-        return SESSION.devices
+            if data is not None:
+                for d in data["deviceInfos"]:
+                    for devices in d["lampInfos"]:
+                        SESSION.devices.append(BulbProperty(self, devices, False))
+            return SESSION.devices
 
     async def discover_devices(self):
         _LOGGER.info("SengledApi: List All Bulbs.")
@@ -252,7 +280,7 @@ class SengledApi:
         try:
             return await Request(url, payload).async_get_response(jsessionId)
         except:
-            return Request(url, payload).get_response(jsessionId)
+            return []
 
     ###################################Login Request only###############################
     async def async_do_login_request(self, url, payload):

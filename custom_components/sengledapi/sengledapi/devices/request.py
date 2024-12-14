@@ -13,7 +13,9 @@ from .exceptions import SengledApiAccessToken
 _LOGGER = logging.getLogger(__name__)
 
 _LOGGER.info("SengledApi: Initializing Request")
-
+_SSL_CIPHERS = (
+    "DEFAULT:!aNULL:!eNULL:!MD5:!3DES:!DES:!RC4:!IDEA:!SEED:!aDSS:!SRP:!PSK"
+)
 
 class Request:
     def __init__(self, url, payload, no_return=False):
@@ -30,6 +32,13 @@ class Request:
             "Connection": "keep-alive",
         }
 
+    @staticmethod
+    def create_ssl_context() -> ssl.SSLContext:
+        """Create a SSL context for LG ThinQ."""
+        context = ssl.create_default_context()
+        context.set_ciphers(_SSL_CIPHERS)
+        return context
+
     def get_response(self, jsession_id):
         self._header = {
             "Content-Type": "application/json",
@@ -45,18 +54,23 @@ class Request:
         self._header = {
             "Content-Type": "application/json",
             "Cookie": "JSESSIONID={}".format(jsession_id),
-            "Host": "element.cloud.sengled.com:443",
             "Connection": "keep-alive",
         }
+        
+        # It's important to create a new SSL context for secure HTTPS requests.
+        sslcontext = self.create_ssl_context()
 
+        # Use aiohttp's ClientSession for asynchronous HTTP requests.
         async with aiohttp.ClientSession() as session:
-            sslcontext = ssl.create_default_context(cafile=certifi.where())
-            async with session.post(
-                self._url, headers=self._header, data=self._payload, ssl=sslcontext
-            ) as resp:
-                data = await resp.json()
-                # _LOGGER.debug("SengledApi: data from Response %s ", str(data))
-                return data
+            async with session.post(self._url, headers=self._header, data=self._payload, ssl=sslcontext) as response:
+                # Make sure to handle potential exceptions and non-JSON responses appropriately.
+                if response.status == 200:
+                    data = await response.read()
+                    data = json.loads(data)
+                    return data
+                else:
+                    # Log an error or handle the response appropriately if not successful.
+                    return None
 
     ########################Login#####################################
     def get_login_response(self):
@@ -69,11 +83,12 @@ class Request:
     async def async_get_login_response(self):
         _LOGGER.info("SengledApi: Get Login Response async.")
         async with aiohttp.ClientSession() as session:
-            sslcontext = ssl.create_default_context(cafile=certifi.where())
+            sslcontext = self.create_ssl_context()
             async with session.post(
                 self._url, headers=self._header, data=self._payload, ssl=sslcontext
             ) as resp:
-                data = await resp.json()
+                data = await resp.read()
+                data = json.loads(data)
                 _LOGGER.debug("SengledApi: Get Login Response %s ", str(data))
                 return data
 
@@ -101,11 +116,12 @@ class Request:
             "X-Requested-With": "com.sengled.life2",
         }
         async with aiohttp.ClientSession() as session:
-            sslcontext = ssl.create_default_context(cafile=certifi.where())
+            sslcontext = self.create_ssl_context()
             async with session.post(
                 self._url, headers=self._header, data=self._payload, ssl=sslcontext
             ) as resp:
-                data = await resp.json()
+                data = await resp.read()
+                data = json.loads(data)
                 _LOGGER.info(
                     "SengledApi: Get Session Timeout Response Async %s", str(data)
                 )
