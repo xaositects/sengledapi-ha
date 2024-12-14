@@ -39,7 +39,7 @@ logger:
   logs:
     custom_components.wyzeapi: debug
 
-For additional information see the readme: https://github.com/jfarmer08/ha-sengledapi#reporting-an-issue
+For additional information see the readme: https://github.com/jfarmer08/sengledapi-ha#reporting-an-issue
 ```
 <PUT YOUR LOG HERE>
 ```

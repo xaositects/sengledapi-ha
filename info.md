@@ -3,7 +3,7 @@
 This is a custom component to allow control of Sengled Bulbs in Homeassistant using the unofficial Sengled API. Please note this mimics the Sengled app and therefore Sengled may cut off access at anytime.
 
 # Supported Bulbs from Sengled
-You can find [Supported Products](https://github.com/xaositects/ha-sengledapi/wiki) here. If you have other bulbs that are not on this list and they do work, you can create a pull request to have the wiki updated.
+You can find [Supported Products](https://github.com/xaositects/sengledapi-ha/wiki) here. If you have other bulbs that are not on this list and they do work, you can create a pull request to have the wiki updated.
 
 **The goal is to support all Sengled Bulbs so feel free to buy me coffee.
 
@@ -26,7 +26,7 @@ You can find [Supported Products](https://github.com/xaositects/ha-sengledapi/wi
 ## Installation (HACS) - Highly Recommended
 
 1. Have HACS installed, this will allow you to easily update
-2. Add [https://github.com/xaositects/ha-sengledapi](https://github.com/xaositects/ha-sengledapi) as a custom repository as Type: Integration
+2. Add [https://github.com/xaositects/sengledapi-ha](https://github.com/xaositects/sengledapi-ha) as a custom repository as Type: Integration
 3. Click install under "Sengled Bulb Integration" in the Integration tab
 4. Restart HA
 

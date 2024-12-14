@@ -40,7 +40,7 @@ async def async_setup(hass, config):
     Version: v0.2
     This is a custom integration
     If you have any issues with this you need to open an issue here:
-    https://github.com/xaositects/ha-sengledapi
+    https://github.com/xaositects/sengledapi-ha
     -------------------------------------------------------------------"""
         )
         _LOGGER.info("""Creating new SengledApi component""")

@@ -1,7 +1,7 @@
 {
   "domain": "sengledapi",
   "name": "Sengled Integration",
-  "documentation": "https://github.com/xaositects/ha-sengledapi",
+  "documentation": "https://github.com/xaositects/sengledapi-ha",
   "dependencies": [],
   "version": "0.2",
   "codeowners": ["@xaositects"],
